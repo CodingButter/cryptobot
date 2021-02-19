@@ -26,7 +26,6 @@ const createClient = (coin)=>{
 
     client.on('connect',(connection)=>{
         console.log(`Websocket Client connected`)
-
         connection.on('error',(error)=>{
             coin.sendError(error)
             console.log(`Connection Error: ${error.toString()}`)

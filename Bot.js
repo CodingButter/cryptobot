@@ -1,9 +1,9 @@
 const Strategies = require('./Strategies')
-const Coinbase = require('./CoinbaseClient')
-const Wallet = require("./Wallet")
+const Wallet = require("./CoinbaseWallet")
 const Coin = require('./Coin')
 
 const { v4: uuid } = require('uuid');
+const authedClient = require('./Coinbase');
 const bots = {}
 
 class Bot{
@@ -13,25 +13,32 @@ class Bot{
         this.coin = new Coin(symbol)
         this.cashWallet = new Wallet(cashWallet)
         this.coinWallet = new Wallet(coinWallet)
-        this.inPosition = this.cashWallet.getBalance()>10?true:false;
+        this.inPosition = true
         this.STRAT = Strategies[strategy.type]
         this.strategy = new this.STRAT(strategy.options)
         this.coin.events.on('candle_closed',(closes)=>this.candleClosed(closes))
     }
 
-    candleClosed(closes){
-        let cashBalance = this.cashWallet.getBalance();
-        let coinBalance = this.coinWallet.getBalance();
-
-        let response = this.strategy.execute(closes)
-        switch(response.action){
+    async candleClosed(closes){
+        let cashBalance = parseFloat(await this.cashWallet.getBalance());
+        let coinBalance = parseFloat(await this.coinWallet.getBalance());
+        let market = this.coinWallet.currency + "-" + this.cashWallet.currency
+        let {min_market_funds} = await authedClient.getProducts()
+        .then(data=>{
+            return data.filter(product=>{
+                return product.id==market
+            })[0]
+        }).then(data=>data)
+        min_market_funds = parseFloat(min_market_funds)
+        let {action} = this.strategy.execute(closes)
+        switch(action){
             case "BUY":
-                if(this.inPosition){
+                if(this.inPosition && cashBalance>min_market_funds){
                     this.inPosition = false
-                    let buyAmount = cashBalance/2
-                    this.cashWallet.empty(buyAmount)
-                    this.coinWallet.fill(this.coin.usdToCoin(buyAmount))
-
+                    let buyAmount = 10 //cashBalance/2
+                    let size = this.coin.usdToCoin(buyAmount)
+                    let results = await this.coinWallet.buy(buyAmount,size,market)
+                    console.log(results)
                     /**
                     *@TODO Add Buy Logic
                     **/
@@ -40,8 +47,9 @@ class Bot{
             case "SELL":
                 if(!this.inPosition){
                     this.inPosition = true;
-                    this.coinWallet.emptyAll()
-                    this.cashWallet.fill(this.coin.coinToUSD(coinBalance))
+                    let size = coinBalance
+                    let results = await this.cionWallet.sell(this.coin.coinToUSD(sellAmount),size,market)
+                    console.log(results)
                     /**
                     *@TODO Add Sell Logic
                     **/
@@ -54,11 +62,11 @@ class Bot{
             break
         }
         console.log({
-            cashWallet:this.cashWallet.getBalance(),
-            coinWallet:this.coinWallet.getBalance(),
+            cashWallet:await this.cashWallet.getBalance(),
+            coinWallet:await this.coinWallet.getBalance(),
             symbol:this.coin.symbol,
             closes:closes[closes.length-1],
-            RSI:response
+            RSI:action
         })
     }
     updateStrategy(strategy){
