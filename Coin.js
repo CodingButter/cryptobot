@@ -71,7 +71,7 @@ class Coin{
     addClose(close){
         this.currentClose = close;
         this.closes.push(close)
-        if(this.closes.length>100)this.closes.pop()
+        if(this.closes.length>100)this.closes.shift()
         this.events.emit('candle_closed',this.closes)
     }
     getCloses(){
