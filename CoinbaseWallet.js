@@ -1,5 +1,5 @@
 const authedClient = require('./CoinBase');
-const toFixed = require('toFixed');
+const toFixed = require('tofixed');
 
 class Wallet{
     constructor(uuid){
@@ -19,7 +19,18 @@ class Wallet{
             throw error
         }
     }
-
+    async getMinMarketFuncts(){
+        return new Promise((resolve,reject)=>{
+            authedClient.getProducts()
+            .then(data=>{
+                return data.filter(product=>{
+                    return product.id==market
+                })[0]
+            }).then(data=>{
+                resolve({min_market_funds})
+            })
+        })
+    }
     async buy(price,size,product_id){
         try{
             price = `'${toFixed(price,2)}'`

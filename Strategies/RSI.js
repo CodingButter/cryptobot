@@ -28,7 +28,9 @@ class RSI{
         }
     }
     calculate(closes){
+        closes = closes.slice(-this.periods)
         let results =  RSIC.calculate({values:closes,period:this.periods})
+        console.log(results)
         return results[results.length-1]
     }
     setOverBought(value){

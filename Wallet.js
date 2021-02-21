@@ -1,61 +1,49 @@
 const fs = require('fs')
 const { v4: uuid } = require('uuid');
+const toFixed = require('tofixed');
 
 const path = require('path');
 const WALLET_PATH = path.join(__dirname,'wallets')
 
 class Wallet{
-    constructor(uuid){
-        this.balance = 0;
-        this.setWallet(uuid)
+    constructor(uuid,cashWallet){
+        this.uuid = uuid
+        this.cashWallet = cashWallet
     }
 
-    setWallet(uuid){
-        if(uuid==undefined){
-            this.createWallet()
-        }else{
-            this.uuid = uuid
-            this.openWallet()
-        }
+    writeBalance(coinBalance,cashBalance){
+        fs.writeFileSync(path.join(WALLET_PATH,this.uuid),toFixed(coinBalance,8))
+        fs.writeFileSync(path.join(WALLET_PATH,this.cashWallet.uuid),toFixed(cashBalance,8))
     }
 
-    createWallet(){
-        this.uuid = uuid()
-        this.updateWallet()
+    async getMinMarketFunds(){
+        return new Promise((resolve,reject)=>{
+            resolve('0.0000001')
+        })
     }
 
-    openWallet(){
-        this.balance = parseFloat(fs.readFileSync(path.join(WALLET_PATH,this.uuid),'utf8'));
+    async buy(buyAmount,size){
+        return new Promise(async (resolve,reject)=>{
+            let newBalance = parseFloat(await this.getBalance()) + parseFloat(size)
+            let cashBalance = parseFloat(await this.cashWallet.getBalance()) - parseFloat(buyAmount)
+            this.writeBalance(newBalance,cashBalance)
+            resolve({status:"success"})
+        })
     }
 
-    updateWallet(){
-        fs.writeFileSync(path.join(WALLET_PATH,this.uuid),parseFloat(this.balance))
-
+    async sell(sellAmount,size){
+        return new Promise(async (resolve,reject)=>{
+            let newBalance = parseFloat(await this.getBalance()) - parseFloat(size);
+            let cashBalance = parseFloat(await this.cashWallet.getBalance()) + parseFloat(sellAmount)
+            this.writeBalance(newBalance,cashBalance)
+            resolve({status:"success"})
+        })
     }
 
-    fill(amount){
-        this.setBalance(this.getBalance()+amount)
-        return this.getBalance()
-    }
-
-    emptyAll(){
-        return this.empty(this.getBalance())
-    }
-
-    empty(amount){
-        this.setBalance(this.getBalance()-amount);
-        return this.getBalance()
-    }
-
-
-    getBalance(){
-        this.openWallet()
-        return this.balance;
-    }
-
-    setBalance(amount){
-        this.balance = amount
-        this.updateWallet()
+    async getBalance(){
+        return new Promise((resolve,reject)=>{
+           resolve(String(parseFloat(fs.readFileSync(path.join(WALLET_PATH,this.uuid),'utf8'))));
+        })
     }
 }
 

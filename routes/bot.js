@@ -2,8 +2,8 @@ const router = require('express').Router();
 const Bot = require("../Bot")
 
 router.post("/",(req,res)=>{
-    let {strategy,symbol,cashWallet,coinWallet} = req.body
-    let myBot = new Bot({strategy,symbol,cashWallet,coinWallet})
+    let {risk,strategy,symbol,cashWallet,coinWallet} = req.body
+    let myBot = new Bot({risk,strategy,symbol,cashWallet,coinWallet})
     res.json({status:"success",uuid:myBot.getUUID()})
 })
 
