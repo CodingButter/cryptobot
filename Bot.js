@@ -8,10 +8,10 @@ const authedClient = require('./CoinBase');
 const bots = {}
 
 class Bot{
-    constructor({risk,strategy,symbol,cashWallet,coinWallet}){
+    constructor({risk,strategy,symbol,cashWallet,coinWallet,interval}){
         this.uuid = uuid()
         Bot.addBot(this)
-        this.coin = new Coin(symbol)
+        this.coin = new Coin(symbol,interval)
         this.cashWallet = new Wallet(cashWallet)
         this.coinWallet = new Wallet(coinWallet,this.cashWallet)
         this.market = this.coinWallet.currency + "-" + this.cashWallet.currency
@@ -25,7 +25,7 @@ class Bot{
         let cashBalance = parseFloat(await this.cashWallet.getBalance());
         let coinBalance = parseFloat(await this.coinWallet.getBalance());
         let min_market_funds = await this.coinWallet.getMinMarketFunds();
-        let {action,rsi} = this.strategy.execute(closes)
+        let {action,indicator} = this.strategy.execute(closes)
         //action = "BUY"
         let result = ""
         switch(action){
@@ -35,54 +35,39 @@ class Bot{
                     let buyAmount = this.risk
                     let size = this.coin.usdToCoin(buyAmount)
                     let results = await this.coinWallet.buy(buyAmount,size,this.market)
-                    result = "Bought Coin"
+                    result = "BOUGHT"
                 }else{
-                    result = "Not In Position"
+                    result = "NO_POSITION"
                 }
             break
             case "SELL":
                 if((this.inPosition==='START' || this.inPosition===false) && coinBalance>0){
                     this.inPosition = true;
                     let size = coinBalance
-                    let results = await this.coinWallet.sell(this.coin.coinToUSD(size),size,market)
-                    result = "Sold Coins"
+                    let results = await this.coinWallet.sell(this.coin.coinToUSD(size),size,this.market)
+                    result = "SOLD"
                 }else{
-                    result = "Not In Positoin"
+                    result = "NO_POSITION"
                 }
             break
-            case undefined:
-                 result = "No RSI Value"
+            case "DO_NOTHING":
+                 result = "NO_INDICATOR"
             break
         }
-        console.log({
+        let taken = {
             cashWallet:await this.cashWallet.getBalance(),
             coinWallet:await this.coinWallet.getBalance(),
             symbol:this.coin.symbol,
             closes:closes[closes.length-1],
-            rsi,
+            indicator,
             action,
             result
-        })
+        }
+        console.log({taken})
     }
 
-    updateStrategy(strategy){
-        let {overBought,overSold,periods} = strategy
-        this.setOverBought(overBought);
-        this.setOverSold(overSold);
-        this.setPeriods(periods);
-    }
-
-    setOverBought(value){
-        if(value)
-        this.strategy.setOverBought(value)
-    }
-    setOverSold(value){
-        if(value)
-        this.strategy.setOverSold(value)
-    }
-    setPeriods(value){
-        if(value)
-        this.strategy.setPeriods(value)
+    update(options){
+        this.strategy.update(options)
     }
     getUUID(){
         return this.uuid

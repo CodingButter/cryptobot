@@ -1,72 +1,19 @@
 //Require the Environment variables
-const dotenv = require('dotenv').config();
-const SOCKET = process.env.SOCKET;
-
 const events = require('events')
-
-//Require websocket client
-const WebSocketClient = require('websocket').client;
-
-const clients =  {};
-
-
-const createClient = (coin)=>{
-
-    //Check if we already have a websocket connected for this coin
-    if(clients[coin.symbol]){
-        coin.setClient(clients[coin.symbol])
-    }
-    let client = new WebSocketClient()
-    clients[coin] = client;
-
-    client.on('connectFailed',(error)=>{
-        coin.sendError(error)
-        console.log(`Connect Error: ${error.toString()}`)
-    })
-
-    client.on('connect',(connection)=>{
-        console.log(`Websocket Client connected`)
-        connection.on('error',(error)=>{
-            coin.sendError(error)
-            console.log(`Connection Error: ${error.toString()}`)
-        })
-
-        connection.on('close',()=>{
-            console.log(`Connection Closed`)
-            connect()
-        })
-
-        connection.on('message',(message)=>{
-            let candle = JSON.parse(message.utf8Data).k
-            //console.log(message)
-            if(candle.x==true){
-                coin.addClose(parseFloat(candle.c))
-            }
-
-        });
-    });
-
-    const connect = ()=>{
-        //Make the Connection to the websocket
-        client.connect(`${SOCKET}${coin.symbol}@kline_1m`);
-    }
-        coin.setClient(client);
-        connect();
-}
+const Client = require("./Binance")
 
 class Coin{
-    constructor(symbol){
-
-        this.symbol = symbol.toLowerCase()
-        this.closes =[]
-        createClient(this)
+    constructor(symbol,interval){
+        this.symbol = symbol
+        this.interval = interval
         this.events = new events.EventEmitter()
+        this.setPreviousCloses()
+        Client.getKLine(this.symbol,this.interval,(close)=>{
+            this.addClose(close)
+        })
     }
-    sendError(error){
-        this.error = error;
-    }
-    setClient(client){
-        this.client = client;
+    async setPreviousCloses(){
+        this.closes = await Client.getKLineHistory(this.symbol,this.interval)
     }
     addClose(close){
         this.currentClose = close;
