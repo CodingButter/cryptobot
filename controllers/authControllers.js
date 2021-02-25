@@ -2,13 +2,25 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config()
 const user = require("../models/user")
 const getJWTToken = ({email,ip,password})=>{
-    const data = [ip,email,password].join("");    
+    const data = [ip,email,password].join("");
     return jwt.sign({data},process.env.JWT_SECRET,{expiresIn:"10h"});
 }
+
 
 const errorHandler = (error)=>{
     let code = 400
     let errorMessage = {}
+
+    //JWT Errors
+    if(error.message.includes("jwt must be provided")){
+        errorMessage.auth = "No Token Was Provided"
+        code = 401
+    }
+
+    if(error.message.includes('jwt malformed')){
+        errorMessage.auth = "Incorrect or Malformed Token"
+        code = 403
+    }
 
     //Login errors
     if(error.message==='Incorrect Email' || error.message==='Incorrect Password'){
@@ -25,14 +37,14 @@ const errorHandler = (error)=>{
     if(error.message==='User validation failed: email: Invalid email'){
         errorMessage.email = "Invalid Email or Password"
     }
-    
-    //Duplication Checks 
+
+
+    //Duplication Checks
     if(error.code===11000){
         if(error.message.includes("email")){
             errorMessage.email = "Email Already Taken"
         }
     }
-
 
 
     console.log({message:error.message,code:error.code})
@@ -50,9 +62,9 @@ module.exports.login_post = async (req,res)=>{
     try{
         const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         const {email,password} = req.body
-        const loggedinUser = await user.login({email,password})        
+        const loggedinUser = await user.login({email,password})
         const token = getJWTToken({ip,email,password})
-        return res.status(200).json({user:userCreate._id,token})
+        return res.status(200).json({user:loggedinUser._id,token})
     //Make sure to return response
     }catch(err){
         let {code,error} = errorHandler(err)
@@ -63,7 +75,8 @@ module.exports.login_post = async (req,res)=>{
 }
 
 module.exports.signup_post = async (req,res)=>{
-    
+    console.log(req.body)
+
     try{
         const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         const {email,password} = req.body
@@ -84,16 +97,16 @@ module.exports.signup_post = async (req,res)=>{
 
 module.exports.authenticateUserToken = (req,res,next) =>{
     try{
-    const authHeader = req.header['authorization'];
+    const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(" ")[1]
+    console.log(authHeader)
     jwt.verify(token,process.env.JWT_SECRET,(error,user)=>{
-        if(error)throw(403)
+        if(error)throw(new Error(error))
         next()
     })
-    next()
     }catch(err){
         let {code,error} = errorHandler(err);
-        return res.satus(code).json({
+        return res.status(code).json({
             error
         })
     }
