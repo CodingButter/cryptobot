@@ -3,6 +3,7 @@ const fs = require('fs');
 const https = require('https');
 const path = require('path');
 const cors = require('cors');
+const {authenticateUserToken} = require('./controllers/authControllers')
 const mongoose = require('mongoose')
 const express = require('express');
 const dotenv = require("dotenv").config();
@@ -31,9 +32,12 @@ const corsOptions = {
 
 //Get Parser
 const bodyParser = require('body-parser')
-//Set Parser
+
+//Set MiddleWare
 app.use(bodyParser.json())
 app.use(cors(corsOptions))
+app.use(authenticateUserToken)
+
 //Set Routes
 app.use("/bot",require('./routes/bot'))
 app.use("/auth",require("./routes/auth"))
