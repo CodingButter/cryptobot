@@ -1,7 +1,7 @@
-const User = require('./user')
-const Bot = require('./bot')
+const UserModel = require('./UserModel')
+const BotModel = require('./BotModel')
 
 module.exports = {
-    User,
-    Bot
+    UserModel,
+    BotModel
 }

@@ -1,9 +1,26 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config()
-const user = require("../models/user")
-const getJWTToken = ({email,ip,password})=>{
-    const data = [ip,email,password].join("");
-    return jwt.sign({data},process.env.JWT_SECRET,{expiresIn:"10h"});
+const UserModel = require("../models/UserModel")
+
+const getJWTToken = (userId)=>{
+    return jwt.sign({userId},process.env.JWT_SECRET,{expiresIn:"10h"});
+}
+
+module.exports.authenticateUserToken = (req,res,next) =>{
+    try{
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(" ")[1]
+        jwt.verify(token,process.env.JWT_SECRET,(error,{userId})=>{
+            req.userId = userId
+            if(error)throw(new Error(error))
+            next()
+        })
+    }catch(err){
+        let {code,error} = errorHandler(err);
+        return res.status(code).json({
+            error
+        })
+    }
 }
 
 
@@ -62,8 +79,8 @@ module.exports.login_post = async (req,res)=>{
     try{
         const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         const {email,password} = req.body
-        const loggedinUser = await user.login({email,password})
-        const token = getJWTToken({ip,email,password})
+        const loggedinUser = await UserModel.login({email,password})
+        const token = getJWTToken(loggedinUser._id)
         return res.status(200).json({user:loggedinUser._id,token})
     //Make sure to return response
     }catch(err){
@@ -80,11 +97,11 @@ module.exports.signup_post = async (req,res)=>{
     try{
         const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         const {email,password} = req.body
-        const userCreate = await user.create({
+        const userCreate = await UserModel.create({
             email,
             password
         })
-        const token = getJWTToken({ip,email,password})
+        const token = getJWTToken(loggedinUser._id)
         return res.status(200).json({user:userCreate._id,token})
     //Make sure to return response
     }catch(err){
@@ -95,20 +112,4 @@ module.exports.signup_post = async (req,res)=>{
     }
 }
 
-module.exports.authenticateUserToken = (req,res,next) =>{
-    try{
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(" ")[1]
-    console.log(authHeader)
-    jwt.verify(token,process.env.JWT_SECRET,(error,user)=>{
-        if(error)throw(new Error(error))
-        next()
-    })
-    }catch(err){
-        let {code,error} = errorHandler(err);
-        return res.status(code).json({
-            error
-        })
-    }
-}
 

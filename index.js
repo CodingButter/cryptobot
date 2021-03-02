@@ -1,6 +1,7 @@
 //Require Native Modules
 const fs = require('fs');
-const https = require('https');
+//const https = require('https');
+const https = require('http');
 const path = require('path');
 const cors = require('cors');
 const {authenticateUserToken} = require('./controllers/authControllers')
@@ -55,7 +56,8 @@ app.use(bodyParser.json())
 app.use("/bot",botRouter)
 app.use("/auth",authRouter)
 
-const httpsServer = https.createServer(credentials,app);
+//const httpsServer = https.createServer(credentials,app);
+const httpsServer = https.createServer(app);
 
 const server = httpsServer.listen(SSL_PORT,()=>{
 	console.log(`Listening on port ${SSL_PORT}`);
