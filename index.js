@@ -1,6 +1,6 @@
 //Require Native Modules
 const fs = require('fs');
-const https = require('http');
+const https = require('https');
 const path = require('path');
 const cors = require('cors');
 const {authenticateUserToken} = require('./controllers/authControllers')
@@ -38,7 +38,16 @@ const corsOptions = {
 const bodyParser = require('body-parser')
 
 //Set MiddleWare
-app.use(cors(corsOptions))
+app.use((req,res,next)=>{
+    res.header('Access-Control-allow-Origin','*');
+    res.header('Access-Control-allow-Headers','*')
+    if(req.method === 'OPTIONS'){
+        console.log("method options set");
+        req.header('Access-Control-Allow-Methods','PUT, POST, PATCH, DELETE, GET')
+        return res.status(200).json({"preflight":"true"});
+    }
+    next()
+})
 app.use(bodyParser.json())
 
 
@@ -46,7 +55,7 @@ app.use(bodyParser.json())
 app.use("/bot",botRouter)
 app.use("/auth",authRouter)
 
-const httpsServer = https.createServer(/*credentials,*/app);
+const httpsServer = https.createServer(credentials,app);
 
 const server = httpsServer.listen(SSL_PORT,()=>{
 	console.log(`Listening on port ${SSL_PORT}`);
