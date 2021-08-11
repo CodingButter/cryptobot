@@ -1,0 +1,123 @@
+.card {
+  width: 100%;
+}
+.content-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  gap: 20px;
+}
+.signup-form-card {
+  border-radius: var(--border-radius);
+}
+.signup-form-card .main-content .textography {
+  width: 100%;
+  margin-left: 2.5vw;
+}
+.signup-form-card img.card-title-image {
+  filter: grayscale(0.8) brightness(0.8);
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  z-index: 0;
+  margin-top: calc(25px - 50%);
+  left: 0;
+  margin-left: auto;
+  z-index: 1;
+  transform: scale(1.1);
+  -webkit-transition: all 0.6s ease;
+  -moz-transition: all 0.6s ease;
+  -ms-transition: all 0.6s ease;
+  -o-transition: all 0.6s ease;
+  transition: all 0.6s ease;
+
+  transform: rotate(0deg);
+
+  animation-name: rotate;
+  animation-duration: 30s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(10deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+.signup-form-card .card-title p {
+  display: inline-block;
+  padding: 0;
+  margin: 0px;
+  padding: 5px;
+  z-index: 2;
+  position: relative;
+  background: rgba(0, 0, 0, 0.6);
+  width: 30%;
+}
+.signup-form-card .card-title {
+  background-color: var(--bg-primary-light);
+  display: block;
+  margin: 0px;
+  width: 100%;
+  overflow: hidden;
+  padding: 0px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+@media only screen and (max-width: 600px) {
+  .signup-form-card {
+    width: 95vw;
+    border-radius: var(--border-radius);
+  }
+}
+
+@media only screen and (min-width: 600px) {
+  .signup-form-card {
+    width: 50vw;
+    max-width: 600px;
+  }
+}
+.raffle-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.raffle-info p.textography.h2 {
+  width: 100%;
+  display: block;
+}
+.button-section {
+  display: flex;
+  gap: 5px;
+}
+p.ticket-number.textography.base {
+  background: var(--bg-secondary-light);
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+.rigger .ticket-not-confirmed {
+  background: #aa2222;
+}
+.rigger .ticket-confirmed {
+  background: green;
+  color: white;
+}
+.rigger > .h4 {
+  display: block;
+  width: 270px;
+  text-align: center;
+  padding: 10px;
+  border-radius: 4px;
+}

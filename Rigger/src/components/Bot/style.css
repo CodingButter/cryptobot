@@ -1,0 +1,10 @@
+.bot-card {
+  padding: 10;
+  width: 100%;
+  min-width: 100;
+  min-height: 200;
+  max-width: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

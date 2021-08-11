@@ -1,0 +1,59 @@
+.card {
+  background-color: var(--bg-secondary-dark);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  padding: 0px;
+  z-index: 0;
+  min-width: 30vw;
+}
+.card-title {
+  background-color: var(--bg-primary-light);
+  display: block;
+  margin: 0px;
+  padding: 2px;
+  width: 100%;
+}
+.card-title p {
+  display: block;
+  padding: 5px;
+  min-width: 150px;
+  margin: 0px;
+}
+.card > p {
+  padding: 10px;
+}
+.card .main-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 10px;
+  justify-content: center;
+}
+.card-footer {
+  background-color: var(--bg-secondary-light);
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 10px;
+  top: 0px;
+  width: 100%;
+}
+.card-footer p {
+  text-align: right;
+  font-size: 0.8rem;
+  display: block;
+  margin-right: 10px;
+}
+.card .card-footer svg {
+  transition: var(--transition-speed);
+}
+.card[expanded='true'] svg {
+  transform: rotate(0deg);
+}
+.card[expanded='false'] svg {
+  transform: rotate(180deg);
+}

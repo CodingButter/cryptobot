@@ -1,0 +1,38 @@
+input.input-field {
+  display: flex;
+  color: var(--text-primary);
+  justify-content: center;
+  padding: 5px;
+  font-size: 1.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius);
+  width: 90%;
+  background-color: var(--bg-secondary-light) !important;
+}
+
+.input-wrapper:first-child {
+  border-top-left-radius: calc(var(--border-radius) * 2);
+  border-top-right-radius: calc(var(--border-radius) * 2);
+}
+.input-wrapper:last-child {
+  border-bottom-left-radius: calc(var(--border-radius) * 2);
+  border-bottom-right-radius: calc(
+    var(--border-radius) * 2
+  );
+}
+.input-wrapper {
+  width: 100%;
+
+  padding: 0 15px 15px 0;
+  margin: 0 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.input-label {
+  width: 100%;
+  display: block;
+  text-align: left;
+}

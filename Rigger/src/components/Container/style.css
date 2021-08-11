@@ -1,0 +1,9 @@
+.container {
+  display: flex;
+  overflow: hidden;
+  transition: var(--transition-speed);
+}
+.container[expanded='false'] {
+  height: 0px !important;
+  padding: 0 !important;
+}

@@ -1,0 +1,29 @@
+button.button {
+  padding: 5px;
+  border-radius: var(--border-radius);
+  border: none;
+}
+button.button {
+  color: var(--text-white);
+  background: var(--text-primary);
+  padding: 10px 20px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  font-size: 1.3rem;
+  filter: grayscale(0);
+}
+button:hover {
+  filter: grayscale(0.5);
+}
+button:active {
+  filter: grayscale(1);
+}
+button p.textography {
+  display: block;
+  margin: 0px !important;
+}
+button.small {
+  font-size: 1rem;
+  padding: 4px;
+  margin: 2px;
+}

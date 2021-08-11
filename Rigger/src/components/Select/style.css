@@ -1,0 +1,9 @@
+.select-wrap svg {
+  transition: var(--transition-speed);
+}
+.select-wrap [expanded='true'] svg {
+  transform: rotate(0deg);
+}
+.select-wrap [expanded='false'] svg {
+  transform: rotate(180deg);
+}
