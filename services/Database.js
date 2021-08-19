@@ -31,7 +31,14 @@ module.exports.addPlant = async (plantInfo) => {
     console.log(error);
   }
 };
-
+module.exports.addPayment = async (transaction) => {
+  try {
+    const results = await db("payments").insert(transaction);
+    return results;
+  } catch (error) {
+    console.log(error);
+  }
+};
 //READ
 module.exports.getUsers = async (id) => {
   if (id) return await db("users").where({ id }).select();
@@ -61,6 +68,12 @@ module.exports.getPlants = async (company) => {
 //UPDATE
 module.exports.usePlant = async (id) => {
   return await db("plants").update({ status: 2 }).where({ id });
+};
+module.exports.getPayment = async (hash) => {
+  return await db("payments").select("hash", hash);
+};
+module.exports.getPayments = async () => {
+  return await db("payments").select();
 };
 
 //DELETE
