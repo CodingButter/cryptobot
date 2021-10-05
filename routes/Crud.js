@@ -2,25 +2,8 @@ const { cars } = require("../data/supercars");
 const { ignores } = require("../data/ignores");
 const router = require("express").Router();
 const db = require("../services/Database");
-const paymentStatus = require("../paymentCron");
 require("dotenv").config();
-//CREATE
-router.use(async (req, res, next) => {
-  const { totalPaid, totalExpected } = await paymentStatus();
-  const data = {
-    totalPaid,
-    totalExpected,
-    remaining: totalExpected - totalPaid,
-    status: this.remaining > 0 ? "unpaid" : "paid",
-    bitcoin_address: `${process.env.BITCOIN_ADDRESS}`,
-  };
-  console.log(data);
-  if (totalPaid >= totalExpected) {
-    next();
-  } else {
-    res.json(data);
-  }
-});
+
 router.post("/create/users", async (req, res) => {
   res.json(await db.addUser(req.body));
 });
@@ -61,9 +44,6 @@ router.get("/create/want/:company", async (req, res) => {
 });
 
 //READ
-router.post("/read/users", async (req, res) => {
-  res.json(await db.getUsers(req.body.id));
-});
 router.get("/read/plants", async (req, res) => {
   res.json(await db.getPlants());
 });

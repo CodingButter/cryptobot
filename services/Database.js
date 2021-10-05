@@ -31,6 +31,21 @@ module.exports.addPlant = async (plantInfo) => {
     console.log(error);
   }
 };
+
+module.exports.addExtentionRequest = async (ip) => {
+  try {
+    console.log({ requestIP: ip });
+    const results = await db("extention").insert({
+      ip,
+      username: ip,
+      datetime: Date.now(),
+    });
+    console.log(results);
+    return results;
+  } catch (error) {
+    console.log(error);
+  }
+};
 module.exports.addPayment = async (transaction) => {
   try {
     const results = await db("payments").insert(transaction);
@@ -40,9 +55,16 @@ module.exports.addPayment = async (transaction) => {
   }
 };
 //READ
-module.exports.getUsers = async (id) => {
-  if (id) return await db("users").where({ id }).select();
-  return await db("users").select();
+module.exports.getUserByUserNamePassword = async (username, password) => {
+  if (!username || !password)
+    return { error: "Username and password required" };
+  const ids = await db("users").where({ username, password }).select("id");
+  if (ids.length == 0) return { error: "no users found" };
+  return ids[0];
+};
+module.exports.getUserById = async (id) => {
+  if (!id) return { error: "user id required" };
+  return await db("users").where({ id }).select();
 };
 
 module.exports.getLedger = async (id) => {

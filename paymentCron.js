@@ -15,7 +15,7 @@ setInterval(async () => {
 const paymentStatus = async () => {
   var totalPaid = 0;
   const payments = await db.getPayments();
-  console.log(payments[0].time);
+
   const weekmils = 1000 * 60 * 60 * 24;
   const currentTime = Date.now();
   const totalExpected = ~~(

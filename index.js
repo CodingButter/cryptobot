@@ -2,13 +2,40 @@
 require("dotenv").config();
 const fs = require("fs");
 const https = require("https");
-const http = require("https");
+const http = require("http");
 const path = require("path");
 const express = require("express");
 const { BuildScript } = require("./BuildScript");
 const crudRouter = require("./routes/Crud");
+const paymentStatus = require("./paymentCron");
+const createExtentionRequest = require("./ExtensionRequest");
+const { AuthRouter, AuthMiddleware } = require("./services/Auth");
+require("dotenv").config();
+var enabledTime = 0;
+const scriptTimeout = 1000 * 60 * 60 * 10;
+//CREATE
+const paymentMiddleware = async (req, res, next) => {
+  const { totalPaid, totalExpected } = await paymentStatus();
+  const data = {
+    totalPaid,
+    totalExpected,
+    remaining: totalExpected - totalPaid,
+    status: totalExpected - totalPaid > 0 ? "unpaid" : "paid",
+    bitcoin_address: `${process.env.BITCOIN_ADDRESS}`,
+    type: "Payment",
+    error: `Payment Required, $${
+      totalExpected - totalPaid
+    } USD Remaining (Bitcoin Address : ${process.env.BITCOIN_ADDRESS})`,
+  };
+  if (totalPaid >= totalExpected) {
+    console.log({ data });
+    next();
+  } else {
+    res.json(data);
+  }
+};
 //Set Up SSL Credentials
-console.log(Date.now() - 1000 * 60 * 60 * 24 * 7 * 5 + 1000 * 60 * 60 * 24 * 3);
+
 const key = fs.readFileSync(
   path.join(__dirname, "ssl", "chatstyler.tk", "server.key"),
   "utf8"
@@ -23,7 +50,7 @@ const credentials = { key, cert };
 const app = express();
 app.enable("trust proxy");
 const SSL_PORT = 443;
-
+const HTTP_PORT = 80;
 //Get Parser
 const requestIp = require("request-ip");
 const bodyParser = require("body-parser");
@@ -34,8 +61,9 @@ var raffleOrder = "";
 //Set MiddleWare
 
 app.use(function (request, response, next) {
+  console.log(request.secure);
   if (!request.secure) {
-    return response.redirect("https://" + request.headers.host + request.url);
+    response.redirect("https://" + request.headers.host + request.url);
   }
 
   next();
@@ -52,10 +80,12 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
+//app.use(AuthMiddleware);
+
 app.use(requestIp.mw());
 
 app.use("/crud", crudRouter);
-
+//app.use("/auth", AuthRouter);
 //Set Routes
 app.use("/jamesabram", express.static("public"));
 app.get("/streamlab/:streamcode", async (req, res) => {
@@ -74,16 +104,23 @@ app.get("/logo", async (req, res) => {
   let chatextension = path.join(__dirname, "data/7dlogo.png");
   res.sendFile(chatextension);
 });
-app.get("/script.js", async (req, res) => {
+app.use(createExtentionRequest).get("/script.js", async (req, res) => {
   res.header("Content-Type:application/javascript");
-  res.send(BuildScript(currentTicketNumber));
+  res.send(
+    BuildScript(currentTicketNumber, Date.now() - enabledTime < scriptTimeout)
+  );
 });
-app.get("/st/:ticketnumber", (req, res) => {
+app.use(paymentMiddleware).get("/st/:ticketnumber", (req, res) => {
+  enabledTime = Date.now();
   currentTicketNumber = req.params.ticketnumber;
+
   res.json({ status: "success" });
 });
-app.get("/ct/:ticketnumber", (req, res) => {
-  confirmTicketNumber = req.params.ticketnumber;
+app.post("/ct", (req, res) => {
+  console.log(req.body);
+  confirmTicketNumber = Buffer.from(req.body.ct, "base64").toString("ascii");
+
+  console.log({ confirmTicketNumber });
   res.json({ status: "success" });
 });
 app.get("/confirm", (req, res) => {
@@ -106,7 +143,11 @@ app.get("/getorder", (req, res) => {
 });
 
 const httpsServer = https.createServer(credentials, app);
-//const httpsServer = https.createServer(app);
+const httpServer = http.createServer(app);
+
+httpServer.listen(HTTP_PORT, () => {
+  console.log(`Listening on port ${HTTP_PORT}`);
+});
 
 const server = httpsServer.listen(SSL_PORT, () => {
   console.log(`Listening on port ${SSL_PORT}`);
