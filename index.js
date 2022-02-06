@@ -23,9 +23,10 @@ const paymentMiddleware = async (req, res, next) => {
     status: totalExpected - totalPaid > 0 ? "unpaid" : "paid",
     bitcoin_address: `${process.env.BITCOIN_ADDRESS}`,
     type: "Payment",
-    error: `Payment Required, $${
+    error: "Pay me OR I End THIS!",
+    /*`Payment Required, $${
       totalExpected - totalPaid
-    } USD Remaining (Bitcoin Address : ${process.env.BITCOIN_ADDRESS})`,
+    } USD Remaining (Bitcoin Address : ${process.env.BITCOIN_ADDRESS})`,*/
   };
   if (totalPaid >= totalExpected) {
     console.log({ data });
@@ -49,7 +50,7 @@ const credentials = { key, cert };
 
 const app = express();
 app.enable("trust proxy");
-const SSL_PORT = 443;
+const SSL_PORT = 5123;
 const HTTP_PORT = 80;
 //Get Parser
 const requestIp = require("request-ip");

